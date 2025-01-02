@@ -3,7 +3,7 @@ name: Scrape website, process to csv and commit the file
 on:
   schedule:
     # Runs every day at 17:00 UTC
-    - cron: '30 17 * * *'
+    - cron: '15,30,45,00 * * * *'
 
 jobs:
   generate-and-commit-csv:
@@ -40,6 +40,7 @@ jobs:
           else
             echo "No changes to commit"
             exit 0
+          fi
       - name: Push changes
         if: success() && steps.commit.outputs.changes == 'true'
         uses: ad-m/github-push-action@master
