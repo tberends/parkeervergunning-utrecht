@@ -3,12 +3,12 @@ name: Scrape website, process to csv and commit the file
 on:
   schedule:
     # Runs every day at 17:00 UTC
-    - cron: '0 17 * * *'
+    - cron: '30 17 * * *'
 
 jobs:
   generate-and-commit-csv:
     runs-on: ubuntu-latest
-    permissions:                # Job-level permissions configuration starts here
+    permissions:                # Job-level permissions configuration starts hier
       contents: write           # 'write' access to repository contents
     steps:
       # Step 1: Checkout the repository
@@ -35,12 +35,16 @@ jobs:
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/*
-          git commit -a -m "Update csvfile"
+          if [ -n "$(git status --porcelain)" ]; then
+            git commit -m "Update csvfile"
+          else
+            echo "No changes to commit"
+            exit 0
       - name: Push changes
+        if: success() && steps.commit.outputs.changes == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           branch: ${{ github.ref }}
           directory: .
           force: true
-      
