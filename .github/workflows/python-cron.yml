@@ -3,7 +3,7 @@ name: Scrape website, process to csv and commit the file
 on:
   schedule:
     # Runs every day at 17:00 UTC
-    - cron: '40 18 * * *'
+    - cron: '00 19 * * *'
 
 jobs:
   generate-and-commit-csv:
@@ -38,14 +38,14 @@ jobs:
           git add data/*
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Update csvfile"
-            echo "::set-output name=changes::true"
+            echo "changes=true" >> $GITHUB_ENV
           else
             echo "No changes to commit"
-            echo "::set-output name=changes::false"
+            echo "changes=false" >> $GITHUB_ENV
             exit 0
           fi        
       - name: Push changes
-        if: success() && steps.commit.outputs.changes == 'true'
+        if: success() && env.changes == 'true'
         uses: ad-m/github-push-action@master
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
