@@ -3,7 +3,7 @@ name: Scrape website, process to csv and commit the file
 on:
   schedule:
     # Runs every day at 17:00 UTC
-    - cron: '00 17 * * *'
+    - cron: '40 18 * * *'
 
 jobs:
   generate-and-commit-csv:
@@ -31,16 +31,19 @@ jobs:
 
       # Step 5: Commit and push the generated CSV file if there are changes
       - name: Commit files
+        id: commit
         run: |
           git config --local user.email "41898282+github-actions[bot]@users.noreply.github.com"
           git config --local user.name "github-actions[bot]"
           git add data/*
           if [ -n "$(git status --porcelain)" ]; then
             git commit -m "Update csvfile"
+            echo "::set-output name=changes::true"
           else
             echo "No changes to commit"
+            echo "::set-output name=changes::false"
             exit 0
-          fi
+          fi        
       - name: Push changes
         if: success() && steps.commit.outputs.changes == 'true'
         uses: ad-m/github-push-action@master
