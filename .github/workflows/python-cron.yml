@@ -3,7 +3,7 @@ name: Scrape website, process to csv and commit the file
 on:
   schedule:
     # Runs every day at 17:00 UTC
-    - cron: '00 19 * * *'
+    - cron: '00 17 * * *'
 
 jobs:
   generate-and-commit-csv:
