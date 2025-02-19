@@ -56,10 +56,12 @@ if os.path.exists(file_path):
     if last_row['bijgewerkt'] != bijgewerkt or last_row['aantal_aanmeldingen'] != int(aantal_aanmeldingen) or last_row['aanmelddatum_eerstvolgende'] != aanmelddatum_eerstvolgende:
         new_data = {'bijgewerkt': bijgewerkt, 'aantal_aanmeldingen': aantal_aanmeldingen, 'aanmelddatum_eerstvolgende': aanmelddatum_eerstvolgende}
         data = pd.concat([data, pd.DataFrame([new_data])], ignore_index=True)
+        data['record'] = range(1, len(data) + 1)  # Add record numbers starting from 1
+        data = data[['record', 'bijgewerkt', 'aantal_aanmeldingen', 'aanmelddatum_eerstvolgende']]  # Reorder columns
         data.to_csv(file_path, index=False)
 else:
     # Write the information to the file
-    new_data = {'bijgewerkt': [bijgewerkt], 'aantal_aanmeldingen': [aantal_aanmeldingen], 'aanmelddatum_eerstvolgende': [aanmelddatum_eerstvolgende]}
+    new_data = {'record': [1], 'bijgewerkt': [bijgewerkt], 'aantal_aanmeldingen': [aantal_aanmeldingen], 'aanmelddatum_eerstvolgende': [aanmelddatum_eerstvolgende]}
     df = pd.DataFrame(new_data)
     df.to_csv(file_path, index=False)
 #%%
