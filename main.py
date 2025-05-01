@@ -13,9 +13,14 @@ import pandas as pd
 # Define the URL
 url = 'https://www.utrecht.nl/wonen-en-leven/parkeren/parkeren-bewoner/wachtlijst-parkeervergunning'
 
+# Define the headers
+headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+}
+
 # Retrieve the HTML from the website
 try:
-    response = requests.get(url)
+    response = requests.get(url, headers=headers, timeout=30)
     response.raise_for_status()
     html = response.text
 except requests.RequestException as e:
