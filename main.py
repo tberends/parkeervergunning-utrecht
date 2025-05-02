@@ -142,7 +142,7 @@ def vind_beste_verbinding():
         return None
     
     # Neem maximaal de eerste 5 proxies voor een snelle test
-    proxies_to_test = proxies[:10]
+    proxies_to_test = proxies[:100]
     print(f"Testen van de eerste {len(proxies_to_test)} proxies...")
     
     # Test de proxies
