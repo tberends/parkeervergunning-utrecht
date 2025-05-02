@@ -61,3 +61,36 @@ Het script probeert eerst een directe verbinding te maken met de website van de 
 - 🛠️ Volledig automatisch - geen handmatige instellingen nodig
 - 🔄 Past zich aan aan veranderende netwerkomstandigheden
 - 🚀 Parallel testen van proxies voor optimale snelheid
+
+## 🧪 Lokaal testen van GitHub Actions
+
+Je kunt de GitHub Actions workflows lokaal testen met behulp van [act](https://github.com/nektos/act). Dit is handig voor het debuggen en testen van workflows voordat je ze naar GitHub pusht.
+
+### Installatie van act
+
+Installeer act volgens de instructies op de [officiële GitHub-pagina](https://github.com/nektos/act#installation).
+
+### Uitvoeren van de workflow
+
+Om de workflow lokaal uit te voeren, gebruik je het volgende commando:
+
+```bash
+act schedule
+```
+
+Dit commando simuleert het schedule-event en voert de workflow uit die scrapet, de data verwerkt en opslaat in CSV-formaat.
+
+### Beschikbare workflows bekijken
+
+Om een lijst van beschikbare workflows te zien, gebruik je:
+
+```bash
+act --list
+```
+
+Dit toont alle beschikbare jobs en workflows in het project.
+
+### Belangrijke opmerkingen
+
+- Op Apple M-chips (zoals M1/M2/M3) kan het nodig zijn om de container-architectuur te specificeren met `--container-architecture linux/amd64`
+- Bij het eerste gebruik zal act vragen welke container-image je wilt gebruiken (micro, medium of large)
