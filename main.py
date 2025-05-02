@@ -6,6 +6,7 @@ Description: This script retrieves and processes parking permit waiting list inf
 #%%
 # Import the necessary libraries
 import os
+import time
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
@@ -18,14 +19,23 @@ headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-# Retrieve the HTML from the website
-try:
-    response = requests.get(url, headers=headers, timeout=30)
-    response.raise_for_status()
-    html = response.text
-except requests.RequestException as e:
-    print(f"Error retrieving the webpage: {e}")
-    exit(1)
+# Functie om verbinding te maken met retry-mechanisme
+def get_webpage(url, headers, max_retries=5, retry_delay=5):
+    for attempt in range(max_retries):
+        try:
+            response = requests.get(url, headers=headers, timeout=30)
+            response.raise_for_status()
+            return response.text
+        except requests.RequestException as e:
+            if attempt < max_retries - 1:
+                print(f"Poging {attempt + 1} mislukt: {e}. Opnieuw proberen over {retry_delay} seconden...")
+                time.sleep(retry_delay)
+            else:
+                print(f"Fout bij ophalen van webpagina na {max_retries} pogingen: {e}")
+                exit(1)
+
+# Retrieve the HTML from the website with retries
+html = get_webpage(url, headers)
 
 soup = BeautifulSoup(html, 'html.parser')
 
@@ -51,6 +61,11 @@ for td in raw_tds:
 
 # Print the found information in one sentence
 print(f'The waiting list was last updated on {bijgewerkt}. There are {aantal_aanmeldingen} people on the waiting list for the Wittevrouwen district. The first person on the waiting list registered on {aanmelddatum_eerstvolgende}.')
+
+# Controleer of data directory bestaat, zo niet, maak deze aan
+data_dir = 'data'
+if not os.path.exists(data_dir):
+    os.makedirs(data_dir)
 
 # Check if file exists
 file_path = 'data/history.csv'
