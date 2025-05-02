@@ -6,36 +6,175 @@ Description: This script retrieves and processes parking permit waiting list inf
 #%%
 # Import the necessary libraries
 import os
-import time
 from bs4 import BeautifulSoup
 import requests
 import pandas as pd
+import urllib3
+import time
+from concurrent.futures import ThreadPoolExecutor
+
+# Onderdruk SSL-waarschuwingen
+urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 # Define the URL
 url = 'https://www.utrecht.nl/wonen-en-leven/parkeren/parkeren-bewoner/wachtlijst-parkeervergunning'
+proxy_list_url = 'https://raw.githubusercontent.com/proxifly/free-proxy-list/main/proxies/protocols/http/data.txt'
 
 # Define the headers
 headers = {
     'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
 }
 
-# Functie om verbinding te maken met retry-mechanisme
-def get_webpage(url, headers, max_retries=5, retry_delay=5):
-    for attempt in range(max_retries):
-        try:
-            response = requests.get(url, headers=headers, timeout=30)
-            response.raise_for_status()
-            return response.text
-        except requests.RequestException as e:
-            if attempt < max_retries - 1:
-                print(f"Poging {attempt + 1} mislukt: {e}. Opnieuw proberen over {retry_delay} seconden...")
-                time.sleep(retry_delay)
-            else:
-                print(f"Fout bij ophalen van webpagina na {max_retries} pogingen: {e}")
-                exit(1)
+def haal_proxy_lijst_op():
+    """Haalt de lijst met proxies op van de gegeven URL"""
+    try:
+        response = requests.get(proxy_list_url, timeout=10)
+        response.raise_for_status()
+        # Split de tekst op spaties en haal eventuele lege regels weg
+        proxies = [proxy.strip() for proxy in response.text.split() if proxy.strip()]
+        print(f"Succesvol {len(proxies)} proxies opgehaald.")
+        return proxies
+    except requests.RequestException as e:
+        print(f"Fout bij het ophalen van de proxy lijst: {e}")
+        return []
 
-# Retrieve the HTML from the website with retries
-html = get_webpage(url, headers)
+def test_directe_verbinding():
+    """Test directe verbinding met de target URL zonder proxy"""
+    print("Testen van directe verbinding zonder proxy...")
+    start_time = time.time()
+    try:
+        response = requests.get(
+            url, 
+            headers=headers, 
+            timeout=30, 
+            verify=False
+        )
+        response_time = time.time() - start_time
+        
+        if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
+            print(f"✅ Directe verbinding werkt! Responstijd: {response_time:.2f}s")
+            return {
+                'methode': 'direct',
+                'status_code': response.status_code,
+                'response_time': response_time,
+                'werkt': True,
+                'html': response.text
+            }
+        
+        print(f"❌ Directe verbinding kreeg een response, maar de inhoud was niet correct.")
+        return {
+            'methode': 'direct',
+            'status_code': response.status_code,
+            'response_time': response_time,
+            'werkt': False
+        }
+    except Exception as e:
+        print(f"❌ Directe verbinding werkt niet: {str(e)}")
+        return {
+            'methode': 'direct',
+            'status_code': None,
+            'response_time': time.time() - start_time,
+            'werkt': False,
+            'error': str(e)
+        }
+
+def test_proxy(proxy, timeout=10):
+    """Test of een proxy werkt met de doel-URL"""
+    proxies = {
+        'http': proxy,
+    }
+    start_time = time.time()
+    try:
+        response = requests.get(
+            url, 
+            headers=headers, 
+            proxies=proxies, 
+            timeout=timeout, 
+            verify=False
+        )
+        response_time = time.time() - start_time
+        
+        # Controleer of de pagina correct is geladen door te zoeken naar verwachte inhoud
+        if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
+            print(f"✅ Proxy {proxy} werkt! Responstijd: {response_time:.2f}s")
+            return {
+                'proxy': proxy,
+                'status_code': response.status_code,
+                'response_time': response_time,
+                'werkt': True,
+                'html': response.text
+            }
+        
+        print(f"❌ Proxy {proxy} kreeg een response, maar de inhoud was niet correct.")
+        return {
+            'proxy': proxy,
+            'status_code': response.status_code,
+            'response_time': response_time,
+            'werkt': False
+        }
+    except Exception as e:
+        print(f"❌ Proxy {proxy} werkt niet: {str(e)}")
+        return {
+            'proxy': proxy,
+            'status_code': None,
+            'response_time': time.time() - start_time,
+            'werkt': False,
+            'error': str(e)
+        }
+
+def vind_beste_verbinding():
+    """Zoekt de beste verbindingsmethode (direct of via proxy)"""
+    
+    # Test eerst de directe verbinding
+    directe_resultaat = test_directe_verbinding()
+    
+    # Als directe verbinding werkt, gebruiken we deze
+    if directe_resultaat.get('werkt', False):
+        print("\nDirecte verbinding werkt goed. We gebruiken deze.")
+        return directe_resultaat
+    
+    # Haal de lijst met proxies op als directe verbinding niet werkt
+    print("\nDirecte verbinding werkt niet goed. Testen van proxies...")
+    proxies = haal_proxy_lijst_op()
+    
+    if not proxies:
+        print("Geen proxies gevonden om te testen.")
+        return None
+    
+    # Neem maximaal de eerste 5 proxies voor een snelle test
+    proxies_to_test = proxies[:10]
+    print(f"Testen van de eerste {len(proxies_to_test)} proxies...")
+    
+    # Test de proxies
+    resultaten = []
+    
+    # Gebruik ThreadPoolExecutor om de tests parallel uit te voeren
+    with ThreadPoolExecutor(max_workers=5) as executor:
+        proxy_resultaten = list(executor.map(test_proxy, proxies_to_test))
+        resultaten = proxy_resultaten
+    
+    # Toon werkende methoden
+    werkende_methoden = [r for r in resultaten if r.get('werkt', False)]
+    if werkende_methoden:
+        # Sorteer op responstijd
+        werkende_methoden.sort(key=lambda x: x.get('response_time', float('inf')))
+        beste_methode = werkende_methoden[0]
+        print(f"\nDe beste proxy is: {beste_methode['proxy']} met responstijd: {beste_methode['response_time']:.2f}s")
+        return beste_methode
+    
+    print("\nGeen werkende verbindingsmethoden gevonden.")
+    return None
+
+# Vind de beste verbindingsmethode
+beste_verbinding = vind_beste_verbinding()
+
+# Als geen werkende verbinding is gevonden, stoppen we
+if not beste_verbinding:
+    print("Geen werkende verbinding gevonden. Het script wordt gestopt.")
+    exit(1)
+
+# Gebruik de HTML van de beste verbinding
+html = beste_verbinding.get('html')
 
 soup = BeautifulSoup(html, 'html.parser')
 
@@ -60,12 +199,7 @@ for td in raw_tds:
         break
 
 # Print the found information in one sentence
-print(f'The waiting list was last updated on {bijgewerkt}. There are {aantal_aanmeldingen} people on the waiting list for the Wittevrouwen district. The first person on the waiting list registered on {aanmelddatum_eerstvolgende}.')
-
-# Controleer of data directory bestaat, zo niet, maak deze aan
-data_dir = 'data'
-if not os.path.exists(data_dir):
-    os.makedirs(data_dir)
+print(f'De wachtlijst is voor het laatst bijgewerkt op {bijgewerkt}. Er staan {aantal_aanmeldingen} mensen op de wachtlijst voor de wijk Wittevrouwen. De eerste persoon op de wachtlijst heeft zich aangemeld op {aanmelddatum_eerstvolgende}.')
 
 # Check if file exists
 file_path = 'data/history.csv'
