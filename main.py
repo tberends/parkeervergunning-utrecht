@@ -43,14 +43,61 @@ def test_directe_verbinding():
     print("Testen van directe verbinding zonder proxy...")
     start_time = time.time()
     try:
+        # Eerste request om de cookie te verkrijgen
         response = requests.get(
             url, 
             headers=headers, 
             timeout=30, 
             verify=False
         )
-        response_time = time.time() - start_time
         
+        # Controleer of we de beveiligingspagina hebben gekregen
+        if 'JavaScript must be enabled' in response.text:
+            print("Beveiligingspagina gedetecteerd, cookie extraheren...")
+            
+            # Extraheer de cookie uit de response
+            import re
+            cookie_match = re.search(r'document\.cookie="([^"]+)"', response.text)
+            
+            if cookie_match:
+                cookie_str = cookie_match.group(1)
+                cookie_name = cookie_str.split('=')[0]
+                cookie_value = cookie_str.split('=')[1].split(';')[0]
+                
+                print(f"Cookie gevonden: {cookie_name}={cookie_value}")
+                
+                # Haal de redirect URL
+                url_match = re.search(r'location\.href="([^"]+)"', response.text)
+                if url_match:
+                    redirect_url = url_match.group(1)
+                    print(f"Redirect URL: {redirect_url}")
+                    
+                    # Maak nieuwe headers met de cookie
+                    new_headers = headers.copy()
+                    new_headers['Cookie'] = f"{cookie_name}={cookie_value}"
+                    
+                    # Doe een nieuwe request met de cookie
+                    response = requests.get(
+                        redirect_url,
+                        headers=new_headers,
+                        timeout=30,
+                        verify=False
+                    )
+                    
+                    response_time = time.time() - start_time
+                    
+                    if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
+                        print(f"✅ Directe verbinding met cookie werkt! Responstijd: {response_time:.2f}s")
+                        return {
+                            'methode': 'direct',
+                            'status_code': response.status_code,
+                            'response_time': response_time,
+                            'werkt': True,
+                            'html': response.text
+                        }
+        
+        # Originele check als we geen beveiligingspagina kregen
+        response_time = time.time() - start_time
         if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
             print(f"✅ Directe verbinding werkt! Responstijd: {response_time:.2f}s")
             return {
@@ -85,16 +132,60 @@ def test_proxy(proxy, timeout=10):
     }
     start_time = time.time()
     try:
+        # Eerste request om de cookie te verkrijgen
         response = requests.get(
             url, 
             headers=headers, 
-            proxies=proxies, 
+            proxies=proxies,
             timeout=timeout, 
             verify=False
         )
-        response_time = time.time() - start_time
         
-        # Controleer of de pagina correct is geladen door te zoeken naar verwachte inhoud
+        # Controleer of we de beveiligingspagina hebben gekregen
+        if 'JavaScript must be enabled' in response.text:
+            print(f"Beveiligingspagina gedetecteerd via proxy {proxy}, cookie extraheren...")
+            
+            # Extraheer de cookie uit de response
+            import re
+            cookie_match = re.search(r'document\.cookie="([^"]+)"', response.text)
+            
+            if cookie_match:
+                cookie_str = cookie_match.group(1)
+                cookie_name = cookie_str.split('=')[0]
+                cookie_value = cookie_str.split('=')[1].split(';')[0]
+                
+                # Haal de redirect URL
+                url_match = re.search(r'location\.href="([^"]+)"', response.text)
+                if url_match:
+                    redirect_url = url_match.group(1)
+                    
+                    # Maak nieuwe headers met de cookie
+                    new_headers = headers.copy()
+                    new_headers['Cookie'] = f"{cookie_name}={cookie_value}"
+                    
+                    # Doe een nieuwe request met de cookie
+                    response = requests.get(
+                        redirect_url,
+                        headers=new_headers,
+                        proxies=proxies,
+                        timeout=timeout,
+                        verify=False
+                    )
+                    
+                    response_time = time.time() - start_time
+                    
+                    if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
+                        print(f"✅ Proxy {proxy} met cookie werkt! Responstijd: {response_time:.2f}s")
+                        return {
+                            'proxy': proxy,
+                            'status_code': response.status_code,
+                            'response_time': response_time,
+                            'werkt': True,
+                            'html': response.text
+                        }
+        
+        # Originele check als we geen beveiligingspagina kregen
+        response_time = time.time() - start_time
         if response.status_code == 200 and 'parkeervergunning' in response.text.lower():
             print(f"✅ Proxy {proxy} werkt! Responstijd: {response_time:.2f}s")
             return {
@@ -208,8 +299,8 @@ if os.path.exists(file_path):
     # Check if the information from the last row matches the new information
     last_row = data.iloc[-1]
     if last_row['bijgewerkt'] != bijgewerkt or last_row['aantal_aanmeldingen'] != int(aantal_aanmeldingen) or last_row['aanmelddatum_eerstvolgende'] != aanmelddatum_eerstvolgende:
-        new_data = {'bijgewerkt': bijgewerkt, 'aantal_aanmeldingen': aantal_aanmeldingen, 'aanmelddatum_eerstvolgende': aanmelddatum_eerstvolgende}
-        data = pd.concat([data, pd.DataFrame([new_data])], ignore_index=True)
+        new_data = {'bijgewerkt': bijgewerkt, 'aantal_aanmeldingen': int(aantal_aanmeldingen), 'aanmelddatum_eerstvolgende': aanmelddatum_eerstvolgende}
+        data = pd.concat([data, pd.DataFrame([new_data], columns=data.columns)], ignore_index=True)
         data['record'] = range(1, len(data) + 1)  # Add record numbers starting from 1
         data = data[['record', 'bijgewerkt', 'aantal_aanmeldingen', 'aanmelddatum_eerstvolgende']]  # Reorder columns
         data.to_csv(file_path, index=False)
