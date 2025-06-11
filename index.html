@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 
 <head>
     <meta charset="utf-8">
-    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport">
+    <meta content="width=device-width, initial-scale=1, shrink-to-fit=no, user-scalable=yes, maximum-scale=5" name="viewport">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <title>Wachtlijst parkeervergunning Utrecht</title>
     <meta name="author" content="Thomas Berends">
@@ -25,13 +25,151 @@
             align-items: center;
             flex-wrap: wrap;
         }
-        @media (max-width: 576px) {
-            .logo {
-                max-width: 100px;
-                margin-left: 0;
+        .card {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border: none;
+            margin-bottom: 1rem;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+            padding: 0.75rem 1rem;
+        }
+        .card-body {
+            padding: 1rem;
+        }
+        canvas {
+            max-height: 400px;
+            width: 100%;
+        }
+        
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .container-fluid {
+                padding: 0.5rem;
             }
+            
+            .logo {
+                max-width: 80px;
+                margin-left: 0;
+                margin-bottom: 0.5rem;
+            }
+            
             h1 {
+                font-size: 1.3rem;
+                line-height: 1.4;
+                flex-direction: column;
+                align-items: flex-start;
+                text-align: left;
+            }
+            
+            h2 {
                 font-size: 1.5rem;
+                margin-bottom: 1rem;
+            }
+            
+            p {
+                font-size: 0.9rem;
+                line-height: 1.5;
+            }
+            
+            .card-header h5 {
+                font-size: 1rem;
+                margin-bottom: 0;
+            }
+            
+            canvas {
+                max-height: 250px;
+            }
+            
+            /* Stack cards vertically on mobile */
+            .col-md-6 {
+                margin-bottom: 1rem;
+            }
+            
+            /* Better table responsiveness */
+            table {
+                font-size: 0.8rem;
+            }
+            
+            /* Touch-friendly links */
+            a {
+                min-height: 44px;
+                display: inline-block;
+                padding: 0.25rem 0;
+            }
+            
+            /* Better spacing */
+            .mt-5 {
+                margin-top: 2rem !important;
+            }
+            
+            .mb-4 {
+                margin-bottom: 1rem !important;
+            }
+        }
+        
+        @media (max-width: 576px) {
+            .container-fluid {
+                padding: 0.25rem;
+            }
+            
+            .logo {
+                max-width: 70px;
+            }
+            
+            h1 {
+                font-size: 1.1rem;
+                margin-bottom: 0.75rem;
+            }
+            
+            h2 {
+                font-size: 1.3rem;
+            }
+            
+            .card-header {
+                padding: 0.5rem 0.75rem;
+            }
+            
+            .card-body {
+                padding: 0.75rem;
+            }
+            
+            canvas {
+                max-height: 200px;
+            }
+            
+            table {
+                font-size: 0.75rem;
+            }
+            
+            /* Ensure DataTable controls are mobile-friendly */
+            .dataTables_filter input {
+                width: 100%;
+                margin-top: 0.5rem;
+            }
+            
+            .dataTables_length select {
+                width: auto;
+            }
+        }
+        
+        /* Extra small devices (phones in portrait) */
+        @media (max-width: 480px) {
+            .logo {
+                max-width: 60px;
+            }
+            
+            h1 {
+                font-size: 1rem;
+            }
+            
+            .card-header h5 {
+                font-size: 0.9rem;
+            }
+            
+            canvas {
+                max-height: 180px;
             }
         }
     </style>
@@ -47,6 +185,45 @@
                     Deze tabel toont de historie van de wachtlijst specifiek voor de wijk Wittevrouwen.
                 </p>
                 <div id="table-container"></div>
+                
+                <!-- Charts sectie -->
+                <div class="mt-5">
+                    <h2>Trends en Ontwikkelingen</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Aantal aanmeldingen over tijd</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="aanmeldingenChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Wachttijd in dagen</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="aanmelddatumChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Overzicht van alle metrics</h5>
+                                </div>
+                                <div class="card-body">
+                                    <canvas id="combinedChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </main>
         <footer class="row">
@@ -56,11 +233,14 @@
             </div>
         </footer>
     </div>
+    
+    <!-- Scripts -->
     <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.2.1/js/bootstrap.bundle.min.js"></script>
     <script src="js/jquery.csv.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     <script src="js/csv_to_html_table.js"></script>
 
     <script>
@@ -79,11 +259,238 @@
                 delimiter: '"'
             },
             datatables_options: {
-                paging: false
+                paging: false,
+                responsive: true,
+                scrollX: true,
+                autoWidth: false,
+                columnDefs: [
+                    { responsivePriority: 1, targets: 0 },
+                    { responsivePriority: 2, targets: 1 },
+                    { responsivePriority: 3, targets: 2 }
+                ],
+                language: {
+                    search: "Zoeken:",
+                    info: "Toont _START_ tot _END_ van _TOTAL_ records",
+                    infoEmpty: "Geen records gevonden",
+                    infoFiltered: "(gefilterd uit _MAX_ totaal records)",
+                    zeroRecords: "Geen overeenkomende records gevonden"
+                },
+                dom: '<"row"<"col-sm-12 col-md-6"f><"col-sm-12 col-md-6">>rt<"row"<"col-sm-12 col-md-5"i><"col-sm-12 col-md-7">>'
             },
             custom_formatting: [
                 [4, format_link]
             ]
+        });
+
+        // Functie om grafieken te maken nadat de data is geladen
+        function createCharts() {
+            console.log('Starting chart creation...');
+            
+            // Laad de CSV data opnieuw voor de grafieken
+            $.get("data/history.csv", function(csvData) {
+                console.log('CSV data loaded');
+                const lines = csvData.trim().split('\n');
+                const data = [];
+                
+                for (let i = 1; i < lines.length; i++) {
+                    const row = lines[i].split(',');
+                    if (row.length >= 4) {
+                        data.push({
+                            record: parseInt(row[0]),
+                            bijgewerkt: row[1],
+                            aantal_aanmeldingen: parseInt(row[2]),
+                            aanmelddatum_eerstvolgende: row[3]
+                        });
+                    }
+                }
+
+                // Sorteer op record nummer
+                data.sort((a, b) => a.record - b.record);
+
+                // Bereid data voor voor grafieken
+                const labels = data.map(d => d.bijgewerkt);
+                const aanmeldingen = data.map(d => d.aantal_aanmeldingen);
+                
+                // Converteer aanmelddatums naar dagen vanaf bijgewerkt datum voor visualisatie
+                const aanmelddatums = data.map(d => {
+                    // Parse aanmelddatum (DD-MM-YYYY)
+                    const aanmeldParts = d.aanmelddatum_eerstvolgende.split('-');
+                    const aanmeldDatum = new Date(parseInt(aanmeldParts[2]), parseInt(aanmeldParts[1]) - 1, parseInt(aanmeldParts[0]));
+                    
+                    // Parse bijgewerkt datum (bijvoorbeeld "12 december 2024")
+                    const maanden = {
+                        'januari': 0, 'februari': 1, 'maart': 2, 'april': 3, 'mei': 4, 'juni': 5,
+                        'juli': 6, 'augustus': 7, 'september': 8, 'oktober': 9, 'november': 10, 'december': 11
+                    };
+                    
+                    const bijgewerktParts = d.bijgewerkt.split(' ');
+                    const dag = parseInt(bijgewerktParts[0]);
+                    const maand = maanden[bijgewerktParts[1]];
+                    const jaar = parseInt(bijgewerktParts[2]);
+                    const bijgewerktDatum = new Date(jaar, maand, dag);
+                    
+                    // Bereken verschil in dagen (bijgewerkt - aanmelddatum)
+                    const diffTime = bijgewerktDatum - aanmeldDatum;
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    return diffDays;
+                });
+
+                console.log('Data processed, creating charts...');
+
+                // Grafiek 1: Aantal Aanmeldingen
+                const ctx1 = document.getElementById('aanmeldingenChart').getContext('2d');
+                new Chart(ctx1, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Aantal Aanmeldingen',
+                            data: aanmeldingen,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Aantal Aanmeldingen'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Bijgewerkt op'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Grafiek 2: Wachttijd in dagen
+                const ctx2 = document.getElementById('aanmelddatumChart').getContext('2d');
+                new Chart(ctx2, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Wachttijd in dagen',
+                            data: aanmelddatums,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            tension: 0.1,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Wachttijd in dagen'
+                                }
+                            },
+                            x: {
+                                title: {
+                                    display: true,
+                                    text: 'Bijgewerkt op'
+                                }
+                            }
+                        }
+                    }
+                });
+
+                // Grafiek 3: Gecombineerd overzicht
+                const ctx3 = document.getElementById('combinedChart').getContext('2d');
+                new Chart(ctx3, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Aantal Aanmeldingen',
+                            data: aanmeldingen,
+                            borderColor: 'rgb(75, 192, 192)',
+                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                            yAxisID: 'y',
+                            tension: 0.1
+                        }, {
+                            label: 'Wachttijd in dagen',
+                            data: aanmelddatums,
+                            borderColor: 'rgb(255, 99, 132)',
+                            backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                            yAxisID: 'y1',
+                            tension: 0.1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        interaction: {
+                            mode: 'index',
+                            intersect: false,
+                        },
+                        scales: {
+                            x: {
+                                display: true,
+                                title: {
+                                    display: true,
+                                    text: 'Bijgewerkt op'
+                                }
+                            },
+                            y: {
+                                type: 'linear',
+                                display: true,
+                                position: 'left',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Aantal Aanmeldingen'
+                                }
+                            },
+                            y1: {
+                                type: 'linear',
+                                display: true,
+                                position: 'right',
+                                beginAtZero: true,
+                                title: {
+                                    display: true,
+                                    text: 'Wachttijd in dagen'
+                                },
+                                grid: {
+                                    drawOnChartArea: false,
+                                }
+                            }
+                        }
+                    }
+                });
+                
+                console.log('All charts created successfully!');
+            }).fail(function() {
+                console.error('Failed to load CSV data');
+            });
+        }
+
+        // Wacht tot de pagina geladen is en start dan de grafieken
+        $(document).ready(function() {
+            console.log('Document ready');
+            // Wacht een moment zodat de DataTable kan laden
+            setTimeout(createCharts, 2000);
         });
     </script>
 </body>
