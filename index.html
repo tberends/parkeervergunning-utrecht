@@ -14,6 +14,15 @@
         crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdn.datatables.net/1.10.19/css/dataTables.bootstrap4.min.css">
     <style>
+        /* Consistente lettertype-instellingen voor hele pagina - zelfde als Chart.js standaard */
+        * {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        
         .logo {
             max-width: 150px;
             vertical-align: left;
@@ -24,6 +33,16 @@
             display: flex;
             align-items: center;
             flex-wrap: wrap;
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        h2 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        h5 {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        }
+        p {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
         }
         .card {
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
@@ -41,6 +60,15 @@
         canvas {
             max-height: 400px;
             width: 100%;
+        }
+        
+        /* DataTables lettertype-consistentie */
+        table, 
+        .dataTables_wrapper,
+        .dataTables_filter,
+        .dataTables_info,
+        .dataTables_length {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif !important;
         }
         
         /* Mobile optimizations */
@@ -282,6 +310,9 @@
             ]
         });
 
+        // Stel Chart.js standaard lettertype in voor consistentie
+        Chart.defaults.font.family = "'Helvetica Neue', Helvetica, Arial, sans-serif";
+        
         // Functie om grafieken te maken nadat de data is geladen
         function createCharts() {
             console.log('Starting chart creation...');
