@@ -268,13 +268,14 @@ if not beste_verbinding:
 html = beste_verbinding.get('html')
 
 soup = BeautifulSoup(html, 'html.parser')
+#print(soup)
 
 # Find the correct information in the HTML
 # Date is behind the string "De wachtlijst is bijgewerkt op"
 bijgewerkt = None
-raw_divs = soup.find_all('div', class_='frame frame-default frame-type-text frame-layout-0 clearfix', id='c453053')
-for div in raw_divs:
-    if 'bijgewerkt op' in div.text:
+all_divs = soup.find_all('div')
+for div in all_divs:
+    if div.text and 'bijgewerkt op' in div.text:
         bijgewerkt = div.text.split('bijgewerkt op')[1].split('.')[0].strip()
         break
 
