@@ -110,32 +110,6 @@ def scrape_alle_wijken_data(soup):
     
     return alle_data
 
-def maak_wittevrouwen_csv():
-    """Maakt een aparte CSV met alleen Wittevrouwen data"""
-    history_file = 'data/history.csv'
-    wittevrouwen_file = 'data/history_wittevrouwen.csv'
-    
-    if os.path.exists(history_file):
-        # Lees de volledige history.csv
-        data = pd.read_csv(history_file)
-        
-        # Filter alleen Wittevrouwen data
-        wittevrouwen_data = data[data['wijk'] == 'Wittevrouwen'].copy()
-        
-        if len(wittevrouwen_data) > 0:
-            # Update record nummers voor de gefilterde data
-            wittevrouwen_data['record'] = range(1, len(wittevrouwen_data) + 1)
-            
-            # Herordenen van kolommen
-            wittevrouwen_data = wittevrouwen_data[['record', 'wijk', 'wachtlijst_voor', 'bijgewerkt', 'aantal_aanmeldingen', 'aanmelddatum_eerstvolgende']]
-            
-            # Schrijf naar apart bestand
-            wittevrouwen_data.to_csv(wittevrouwen_file, index=False)
-            print(f"Wittevrouwen CSV aangemaakt met {len(wittevrouwen_data)} records")
-        else:
-            print("Geen Wittevrouwen data gevonden in history.csv")
-    else:
-        print("history.csv niet gevonden")
 
 # Haal website data op
 html = haal_website_data()
@@ -241,6 +215,3 @@ else:
     df = pd.DataFrame(nieuwe_records)
     df.to_csv(file_path, index=False)
     print(f"\nNieuwe CSV aangemaakt met data voor {len(alle_wijken_data)} records")
-
-# Maak Wittevrouwen CSV
-maak_wittevrouwen_csv()
