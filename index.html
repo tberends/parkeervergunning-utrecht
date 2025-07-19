@@ -318,7 +318,7 @@
             console.log('Starting chart creation...');
             
             // Laad de CSV data opnieuw voor de grafieken
-            $.get("data/history.csv", function(csvData) {
+            $.get("data/history_wittevrouwen.csv", function(csvData) {
                 console.log('CSV data loaded');
                 const lines = csvData.trim().split('\n');
                 const data = [];

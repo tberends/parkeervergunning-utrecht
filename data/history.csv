@@ -1,12 +1,32 @@
-record,bijgewerkt,aantal_aanmeldingen,aanmelddatum_eerstvolgende
-1,12 december 2024,110,26-05-2024
-2,12 december 2024,96,02-07-2024
-3,9 januari 2025,96,02-07-2024
-4,14 februari 2025,74,30-09-2024
-5,5 maart 2025,83,11-10-2024
-6,17 april 2025,89,31-10-2024
-7,6 mei 2025,98,31-10-2024
-8,22 mei 2025,95,17-11-2024
-9,6 juni 2025,95,22-11-2024
-10,24 juni 2025,97,03-12-2024
-11,10 juli 2025,104,03-12-2024
+record,wijk,wachtlijst_voor,bijgewerkt,aantal_aanmeldingen,aanmelddatum_eerstvolgende
+1,Wittevrouwen,vergunning bewoner,12 december 2024,110,26-05-2024
+2,Wittevrouwen,vergunning bewoner,12 december 2024,96,02-07-2024
+3,Wittevrouwen,vergunning bewoner,9 januari 2025,96,02-07-2024
+4,Wittevrouwen,vergunning bewoner,14 februari 2025,74,30-09-2024
+5,Wittevrouwen,vergunning bewoner,5 maart 2025,83,11-10-2024
+6,Wittevrouwen,vergunning bewoner,17 april 2025,89,31-10-2024
+7,Wittevrouwen,vergunning bewoner,6 mei 2025,98,31-10-2024
+8,Wittevrouwen,vergunning bewoner,22 mei 2025,95,17-11-2024
+9,Wittevrouwen,vergunning bewoner,6 juni 2025,95,22-11-2024
+10,Wittevrouwen,vergunning bewoner,24 juni 2025,97,03-12-2024
+11,Wittevrouwen,vergunning bewoner,10 juli 2025,104,03-12-2024
+12,2e Daalsebuurt,Vergunning bewoner,10 juli 2025,1,09-07-2025
+13,2e Daalsebuurt,2e vergunning bewoner op adres,10 juli 2025,19,06-05-2025
+14,Europalaan Noord,vergunning bewoner,10 juli 2025,121,06-10-2022
+15,Janskerkhof e.o.,vergunning bewoner,10 juli 2025,40,23-12-2024
+16,Janskerkhof e.o.,vergunning bedrijf,10 juli 2025,13,12-09-2024
+17,Lodewijk Napoleonplantsoen e.o.,2e vergunning bewoner op adres,10 juli 2025,12,19-07-2024
+18,Nieuwegracht e.o.,vergunning bewoner,10 juli 2025,94,07-06-2023
+19,Oog in Al,2e vergunning bewoner op adres,10 juli 2025,12,09-05-2025
+20,Oudwijk,vergunning bewoner,10 juli 2025,42,01-03-2025
+21,Rivierenwijk,2e vergunning bewoner op adres,10 juli 2025,87,20-06-2023
+22,Rotsoord Tolsteeg,1e vergunning bewoner op adres,10 juli 2025,30,15-04-2025
+23,Rotsoord Tolsteeg,2e vergunning bewoner op adres,10 juli 2025,22,14-08-2024
+24,Schildersbuurt,2e vergunning bewoner op adres,10 juli 2025,145,16-11-2016
+25,Springweg e.o.,vergunning bewoner,10 juli 2025,64,18-09-2024
+26,Tuindorp Noord,2e vergunning bewoner op adres,10 juli 2025,5,06-05-2025
+27,Vogelenbuurt e.o.,vergunning bewoner,10 juli 2025,125,10-11-2024
+28,Watervogelbuurt,vergunning bewoner,10 juli 2025,7,04-06-2025
+29,Wijk C,vergunning bewoner,10 juli 2025,51,01-03-2023
+30,Zeeheldenbuurt,2e vergunning bewoner op adres,10 juli 2025,15,23-04-2025
+31,Zuilen West,vergunning bewoner,10 juli 2025,7,17-05-2025
