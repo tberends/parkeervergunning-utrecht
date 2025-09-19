@@ -489,13 +489,19 @@
                 Deze tabel toont de historie van de wachtlijst voor alle wijken.
             </p>
             
-            <!-- Wijk filter -->
+            <!-- Filters -->
             <div class="filter-section">
                 <div class="row">
-                    <div class="col-md-6">
+                    <div class="col-md-6 mb-3">
                         <label for="wijkFilter" class="form-label">Selecteer wijk</label>
                         <select id="wijkFilter" class="form-control">
                             <option value="Wittevrouwen" selected>Wittevrouwen</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6 mb-3">
+                        <label for="vergunningFilter" class="form-label">Selecteer type vergunning</label>
+                        <select id="vergunningFilter" class="form-control" disabled>
+                            <option value="">Eerst een wijk selecteren</option>
                         </select>
                     </div>
                 </div>
@@ -602,7 +608,7 @@
             // Wacht tot DataTable is geïnitialiseerd en sla referentie op
             setTimeout(function() {
                 dataTable = $('#table-container-table').DataTable();
-                // Filter initieel op Wittevrouwen
+                // Filter initieel op Wittevrouwen (vergunning filter wordt later geladen)
                 filterTable();
             }, 1000);
         }
@@ -642,7 +648,44 @@
                 
                 // Laad alle data
                 loadAllData();
+                
+                // Laad vergunning types voor de standaard geselecteerde wijk
+                loadVergunningTypes('Wittevrouwen');
             });
+        }
+        
+        // Functie om vergunning types te laden op basis van geselecteerde wijk
+        function loadVergunningTypes(selectedWijk) {
+            const vergunningTypes = new Set();
+            
+            // Filter data op geselecteerde wijk
+            const filteredData = allData.filter(d => d.wijk === selectedWijk);
+            
+            // Verzamel unieke vergunning types
+            filteredData.forEach(d => {
+                vergunningTypes.add(d.wachtlijst_voor);
+            });
+            
+            // Vul dropdown met vergunning types
+            const vergunningFilter = $('#vergunningFilter');
+            vergunningFilter.empty();
+            
+            if (vergunningTypes.size > 0) {
+                vergunningFilter.prop('disabled', false);
+                
+                // Sorteer vergunning types alfabetisch
+                const sortedVergunningTypes = Array.from(vergunningTypes).sort();
+                
+                // Voeg "Alle types" optie toe
+                vergunningFilter.append('<option value="">Alle types</option>');
+                
+                sortedVergunningTypes.forEach(vergunning => {
+                    vergunningFilter.append(`<option value="${vergunning}">${vergunning}</option>`);
+                });
+            } else {
+                vergunningFilter.prop('disabled', true);
+                vergunningFilter.append('<option value="">Geen data beschikbaar</option>');
+            }
         }
         
         // Functie om alle data te laden
@@ -671,13 +714,19 @@
             });
         }
         
-        // Functie om tabel te filteren op wijk
+        // Functie om tabel te filteren op wijk en vergunning type
         function filterTable() {
             const selectedWijk = $('#wijkFilter').val();
+            const selectedVergunning = $('#vergunningFilter').val();
             
             if (dataTable) {
-                // Filter de DataTable op kolom 1 (wijk kolom, index 1)
+                // Filter de DataTable op kolom 1 (wijk kolom, index 1) en kolom 2 (vergunning type, index 2)
                 dataTable.column(1).search(selectedWijk).draw();
+                if (selectedVergunning) {
+                    dataTable.column(2).search(selectedVergunning).draw();
+                } else {
+                    dataTable.column(2).search('').draw();
+                }
             }
         }
         
@@ -685,12 +734,19 @@
         function createCharts() {
             console.log('Starting chart creation...');
             
-            // Filter data op geselecteerde wijk
+            // Filter data op geselecteerde wijk en vergunning type
             const selectedWijk = $('#wijkFilter').val();
-            const filteredData = allData.filter(d => d.wijk === selectedWijk);
+            const selectedVergunning = $('#vergunningFilter').val();
+            
+            let filteredData = allData.filter(d => d.wijk === selectedWijk);
+            
+            // Filter ook op vergunning type als geselecteerd
+            if (selectedVergunning) {
+                filteredData = filteredData.filter(d => d.wachtlijst_voor === selectedVergunning);
+            }
             
             if (filteredData.length === 0) {
-                console.log('No data found for selected wijk:', selectedWijk);
+                console.log('No data found for selected filters:', selectedWijk, selectedVergunning);
                 return;
             }
 
@@ -894,6 +950,14 @@
             
             // Event listener voor wijk filter
             $('#wijkFilter').on('change', function() {
+                const selectedWijk = $(this).val();
+                loadVergunningTypes(selectedWijk);
+                filterTable();
+                createCharts();
+            });
+            
+            // Event listener voor vergunning filter
+            $('#vergunningFilter').on('change', function() {
                 filterTable();
                 createCharts();
             });
