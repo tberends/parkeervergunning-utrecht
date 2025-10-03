@@ -11,6 +11,7 @@ import pandas as pd
 import urllib3
 import time
 import re
+from datetime import datetime
 
 # Onderdruk SSL-waarschuwingen
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
@@ -164,7 +165,8 @@ if os.path.exists(file_path):
                     'wachtlijst_voor': wachtlijst_voor,
                     'bijgewerkt': bijgewerkt,
                     'aantal_aanmeldingen': int(wijk_data['aantal']),
-                    'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht']
+                    'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht'],
+                    'datum_script': datetime.now().strftime('%d-%m-%Y')
                 }
                 nieuwe_records.append(nieuwe_record)
                 wijken_met_veranderingen.append(f"{wijk_naam} ({wachtlijst_voor})")
@@ -175,7 +177,8 @@ if os.path.exists(file_path):
                 'wachtlijst_voor': wachtlijst_voor,
                 'bijgewerkt': bijgewerkt,
                 'aantal_aanmeldingen': int(wijk_data['aantal']),
-                'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht']
+                'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht'],
+                'datum_script': datetime.now().strftime('%d-%m-%Y')
             }
             nieuwe_records.append(nieuwe_record)
             wijken_met_veranderingen.append(f"{wijk_naam} ({wachtlijst_voor})")
@@ -189,7 +192,7 @@ if os.path.exists(file_path):
         data['record'] = range(1, len(data) + 1)
         
         # Herordenen van kolommen
-        data = data[['record', 'wijk', 'wachtlijst_voor', 'bijgewerkt', 'aantal_aanmeldingen', 'aanmelddatum_eerstvolgende']]
+        data = data[['record', 'wijk', 'wachtlijst_voor', 'bijgewerkt', 'aantal_aanmeldingen', 'aanmelddatum_eerstvolgende', 'datum_script']]
         
         # Sla op
         data.to_csv(file_path, index=False)
@@ -208,7 +211,8 @@ else:
             'wachtlijst_voor': wijk_data['wachtlijst_voor'],
             'bijgewerkt': bijgewerkt,
             'aantal_aanmeldingen': int(wijk_data['aantal']),
-            'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht']
+            'aanmelddatum_eerstvolgende': wijk_data['eerstvolgende_wacht'],
+            'datum_script': datetime.now().strftime('%d-%m-%Y')
         }
         nieuwe_records.append(nieuwe_record)
     
